@@ -97,99 +97,107 @@ Expected files: `rankings.png`, `admin-panel.png`, `admin-users.png`, `admin-sco
 - **Hosting**: Cloudflare Pages
 - **Adapter**: @sveltejs/adapter-cloudflare
 
-## Quick Start
+## Quick Start (3 steps)
 
 ### Prerequisites
 
-- Node.js 18+
-- npm
-- Wrangler CLI (`npm install -g wrangler`)
-- Cloudflare account (free tier works)
+- [Node.js 18+](https://nodejs.org/) (click download, install, done)
+- [Cloudflare account](https://dash.cloudflare.com/sign-up) (free, no credit card needed)
 
-### 1. Clone & Install
+### Step 1: Download & Install
 
 ```bash
-git clone <repo-url>
-cd rok-manager
+git clone https://github.com/Minnyat/rok.git
+cd rok
 npm install
 ```
 
-### 2. Set Up Cloudflare D1
+### Step 2: One-Command Setup
 
 ```bash
-# Login to Cloudflare
-wrangler login
+npm run setup
+```
 
-# Create a D1 database
+The setup script will guide you through:
+- Login to Cloudflare (opens browser)
+- Enter your kingdom name
+- Choose admin password
+- Auto-create database, run migrations, build & deploy
+
+### Step 3: Bind Database (one-time, in browser)
+
+After deploy, go to [Cloudflare Dashboard](https://dash.cloudflare.com):
+
+1. **Workers & Pages** > **rok-manager** > **Settings** > **Bindings**
+2. Click **Add binding** > **D1 Database**
+3. Variable name: `DB`, select `rok-manager-db`
+4. **Save** > run `npm run deploy` one more time
+
+Done! Your app is live.
+
+### Subsequent Deploys
+
+```bash
+npm run deploy
+```
+
+---
+
+<details>
+<summary><strong>Manual Setup (advanced)</strong></summary>
+
+If you prefer to set up step by step:
+
+#### Prerequisites
+
+- Node.js 18+, npm
+- Wrangler CLI (`npm install -g wrangler`)
+- Cloudflare account
+
+#### 1. Clone & Install
+
+```bash
+git clone https://github.com/Minnyat/rok.git
+cd rok
+npm install
+```
+
+#### 2. Set Up Cloudflare D1
+
+```bash
+wrangler login
 wrangler d1 create rok-manager-db
 ```
 
-Copy the `database_id` from the output and update `wrangler.toml`:
+Copy the `database_id` from the output and update `wrangler.toml`.
 
-```toml
-name = "rok-manager"
-compatibility_date = "2024-09-23"
-compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".svelte-kit/cloudflare"
+#### 3. Set Admin Password
 
-[[d1_databases]]
-binding = "DB"
-database_name = "rok-manager-db"
-database_id = "YOUR_DATABASE_ID_HERE"
-```
-
-### 3. Run Migrations
+Generate a bcrypt hash and update `migrations/0002_seed_admin.sql`:
 
 ```bash
-# Local development
-wrangler d1 execute rok-manager-db --local --file=migrations/0001_init.sql
-wrangler d1 execute rok-manager-db --local --file=migrations/0002_seed_admin.sql
-wrangler d1 execute rok-manager-db --local --file=migrations/0003_user_bonus.sql
+node -e "require('bcryptjs').hash('YourPassword',10).then(console.log)"
+```
 
-# Production (remote)
+#### 4. Run Migrations
+
+```bash
 wrangler d1 execute rok-manager-db --remote --file=migrations/0001_init.sql
 wrangler d1 execute rok-manager-db --remote --file=migrations/0002_seed_admin.sql
 wrangler d1 execute rok-manager-db --remote --file=migrations/0003_user_bonus.sql
 ```
 
-The seed migration (`0002_seed_admin.sql`) creates the admin user:
-- **Username**: `admin`
-- **Password**: (set in `migrations/0002_seed_admin.sql` — generate your own bcrypt hash)
-
-> **Important**: Generate your own admin password hash before deploying!
-
-### 4. Local Development
+#### 5. Build & Deploy
 
 ```bash
-# Build first (required for Cloudflare adapter)
-npm run build
-
-# Start local dev server with D1
-npm run preview
+npm run deploy
 ```
 
-The app will be available at `http://localhost:8788`.
+#### 6. Bind D1 to Pages
 
-### 5. Deploy to Cloudflare Pages
+In Cloudflare Dashboard: Workers & Pages > rok-manager > Settings > Bindings > Add D1 binding (variable: `DB`). Save and redeploy.
 
-```bash
-# Build
-npm run build
-
-# Deploy
-wrangler pages deploy .svelte-kit/cloudflare --project-name rok-manager
-```
-
-First deploy will create the Pages project. Subsequent deploys update it.
-
-#### Bind D1 to Pages (first time only)
-
-After the first deploy, bind the D1 database to the Pages project via the Cloudflare Dashboard:
-
-1. Go to **Cloudflare Dashboard** > **Workers & Pages** > **rok-manager**
-2. **Settings** > **Bindings** > **Add binding**
-3. Select **D1 Database**, variable name: `DB`, select your database
-4. **Save** and redeploy
+</details>
 
 ## Project Structure
 
@@ -333,44 +341,31 @@ This section is designed for AI assistants (Claude, GPT, etc.) to read and execu
 
 This is a SvelteKit 5 app using Svelte 5 runes (`$state()`, `$derived()`, `$props()`, `$effect()`, `getContext()`). It deploys to Cloudflare Pages with D1 (SQLite) as the database. The adapter is `@sveltejs/adapter-cloudflare`.
 
-### Setup Steps (execute in order)
+### Quick Setup (recommended)
 
 ```
-STEP 1: Install dependencies
-  $ npm install
+STEP 1: $ npm install
+STEP 2: $ npm run setup
+  (Interactive script: creates D1, sets password, migrates, builds, deploys)
+STEP 3: Bind D1 in Cloudflare Dashboard (Workers & Pages > rok-manager > Settings > Bindings > Add D1 "DB")
+STEP 4: $ npm run deploy
+```
 
-STEP 2: Login to Cloudflare
-  $ wrangler login
-  (User must complete OAuth in browser)
+### Manual Setup (step by step)
 
-STEP 3: Create D1 database
-  $ wrangler d1 create rok-manager-db
-  NOTE: Copy the database_id from output
-
-STEP 4: Update wrangler.toml
-  Replace database_id value with the ID from Step 3
-
-STEP 5: Run migrations (remote)
-  $ wrangler d1 execute rok-manager-db --remote --file=migrations/0001_init.sql
+```
+STEP 1: $ npm install
+STEP 2: $ wrangler login
+STEP 3: $ wrangler d1 create rok-manager-db
+  NOTE: Copy the database_id from output, update wrangler.toml
+STEP 4: Generate admin password hash:
+  $ node -e "require('bcryptjs').hash('YourPassword',10).then(console.log)"
+  Update migrations/0002_seed_admin.sql with the hash
+STEP 5: $ wrangler d1 execute rok-manager-db --remote --file=migrations/0001_init.sql
   $ wrangler d1 execute rok-manager-db --remote --file=migrations/0002_seed_admin.sql
   $ wrangler d1 execute rok-manager-db --remote --file=migrations/0003_user_bonus.sql
-
-STEP 6: Build
-  $ npx vite build
-
-STEP 7: Create Pages project (first time)
-  $ wrangler pages project create rok-manager
-
-STEP 8: Deploy
-  $ wrangler pages deploy .svelte-kit/cloudflare --project-name rok-manager
-
-STEP 9: Bind D1 to Pages project
-  Via Cloudflare Dashboard: Workers & Pages > rok-manager > Settings > Bindings
-  Add D1 binding: variable name = "DB", select the rok-manager-db database
-  Then redeploy (repeat Step 8)
-
-STEP 10: Verify
-  Visit the deployed URL, login with admin / your-password
+STEP 6: $ npm run deploy
+STEP 7: Bind D1 in Cloudflare Dashboard, then $ npm run deploy again
 ```
 
 ### Key Files for Modifications

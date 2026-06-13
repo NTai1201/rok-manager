@@ -6,6 +6,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "wrangler pages dev .svelte-kit/cloudflare",
+    "setup": "node scripts/setup.mjs",
+    "deploy": "vite build && wrangler pages deploy .svelte-kit/cloudflare --project-name rok-manager",
     "db:migrate:local": "wrangler d1 migrations apply rok-manager-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply rok-manager-db --remote"
   },
