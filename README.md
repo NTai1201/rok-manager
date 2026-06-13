@@ -123,7 +123,7 @@
 ### Step 1: Download & Install
 
 ```bash
-git clone https://github.com/Minnyat/rok.git
+git clone https://github.com/Minnyat/rok-manager.git
 cd rok
 npm install
 ```
@@ -187,7 +187,7 @@ If you prefer to set up step by step:
 #### 1. Clone & Install
 
 ```bash
-git clone https://github.com/Minnyat/rok.git
+git clone https://github.com/Minnyat/rok-manager.git
 cd rok
 npm install
 ```
