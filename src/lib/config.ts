@@ -1,6 +1,6 @@
 export const config = {
 	kingdomName: 'ROK Manager',
-	kingdomNumber: '',
+	kingdomNumber: '2640',
 	subtitle: 'Kingdom Management System',
 	adminUsername: 'admin',
 };

@@ -110,7 +110,7 @@ async function main() {
   }
 
   // Hash password using bcryptjs (already installed)
-  const bcrypt = await import('bcryptjs');
+  const bcrypt = (await import('bcryptjs')).default;
   const hash = await bcrypt.hash(password, 10);
 
   // Update seed migration
